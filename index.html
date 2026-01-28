@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Basoon</title>
+
+<style>
+  body {
+    margin: 0;
+    font-family: "Comic Sans MS", "Comic Sans", cursive;
+    background: linear-gradient(135deg, #5f2c82, #49a09d);
+    color: white;
+  }
+
+  header {
+    text-align: center;
+    padding: 25px;
+    background: rgba(0,0,0,0.5);
+  }
+
+  header h1 {
+    margin: 0;
+    font-size: 3rem;
+    color: #ffdd59;
+  }
+
+  #searchBar {
+    margin-top: 15px;
+    width: 90%;
+    max-width: 500px;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    font-size: 16px;
+  }
+
+  .games-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 15px;
+    padding: 20px;
+  }
+
+  .game-card {
+    background: rgba(255,255,255,0.15);
+    border-radius: 14px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+
+  .game-card:hover {
+    transform: scale(1.06);
+    box-shadow: 0 0 15px #ffdd59;
+  }
+
+  .game-card img {
+    width: 100%;
+    height: 110px;
+    object-fit: cover;
+  }
+
+  .game-card h3 {
+    margin: 8px;
+    font-size: 14px;
+    text-align: center;
+  }
+
+  #gameModal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.95);
+    z-index: 999;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+
+  #gameFrame {
+    width: 90%;
+    height: 75%;
+    border: none;
+    border-radius: 10px;
+  }
+
+  .controls {
+    margin-top: 10px;
+  }
+
+  button {
+    margin: 6px;
+    padding: 10px 18px;
+    border-radius: 10px;
+    border: none;
+    background: #ffdd59;
+    font-size: 15px;
+    cursor: pointer;
+    font-family: "Comic Sans MS", "Comic Sans", cursive;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Basoon</h1>
+  <input type="text" id="searchBar" placeholder="Search games...">
+</header>
+
+<div class="games-container" id="gamesContainer"></div>
+
+<div id="gameModal">
+  <iframe id="gameFrame"></iframe>
+  <div class="controls">
+    <button onclick="toggleFullscreen()">Fullscreen</button>
+    <button onclick="closeGame()">Exit</button>
+  </div>
+</div>
+
+<script>
+const games = [
+  { title: 'Veck.io', url: 'https://veck.io/', img: 'https://picsum.photos/200/150?1' },
+  { title: 'Rocket Goal', url: 'https://rocketgoal.io/', img: 'https://picsum.photos/200/150?2' },
+  { title: 'Slither.io', url: 'https://slither.io/', img: 'https://picsum.photos/200/150?3' },
+  { title: 'Paper.io 2', url: 'https://paper-io.com/', img: 'https://picsum.photos/200/150?4' },
+
+  // PC-only / non-mobile
+  { title: 'Krunker.io (PC)', url: 'https://krunker.io/', img: 'https://picsum.photos/200/150?5' },
+  { title: 'Shell Shockers (PC)', url: 'https://shellshock.io/', img: 'https://picsum.photos/200/150?6' },
+  { title: 'Venge.io (PC)', url: 'https://venge.io/', img: 'https://picsum.photos/200/150?7' },
+  { title: 'Zombs Royale (PC)', url: 'https://zombsroyale.io/', img: 'https://picsum.photos/200/150?8' },
+  { title: 'Surviv.io (PC)', url: 'https://surviv.io/', img: 'https://picsum.photos/200/150?9' },
+  { title: '1v1.LOL (PC)', url: 'https://1v1.lol/', img: 'https://picsum.photos/200/150?10' },
+  { title: 'War Brokers (PC)', url: 'https://warbrokers.io/', img: 'https://picsum.photos/200/150?11' },
+  { title: 'MooMoo.io (PC)', url: 'https://moomoo.io/', img: 'https://picsum.photos/200/150?12' },
+  { title: 'Diep.io (PC)', url: 'https://diep.io/', img: 'https://picsum.photos/200/150?13' },
+  { title: 'Ev.io (PC)', url: 'https://ev.io/', img: 'https://picsum.photos/200/150?14' },
+  { title: 'Bloxd.io (PC)', url: 'https://bloxd.io/', img: 'https://picsum.photos/200/150?15' },
+  { title: 'LOLBeans.io (PC)', url: 'https://lolbeans.io/', img: 'https://picsum.photos/200/150?16' }
+];
+
+const container = document.getElementById("gamesContainer");
+const modal = document.getElementById("gameModal");
+const frame = document.getElementById("gameFrame");
+const searchBar = document.getElementById("searchBar");
+
+function showGames(list) {
+  container.innerHTML = "";
+  list.forEach(game => {
+    const card = document.createElement("div");
+    card.className = "game-card";
+    card.innerHTML = `
+      <img src="${game.img}">
+      <h3>${game.title}</h3>
+    `;
+    card.onclick = () => openGame(game.url);
+    container.appendChild(card);
+  });
+}
+
+showGames(games);
+
+searchBar.addEventListener("input", () => {
+  const value = searchBar.value.toLowerCase();
+  showGames(games.filter(g => g.title.toLowerCase().includes(value)));
+});
+
+function openGame(url) {
+  frame.src = url;
+  modal.style.display = "flex";
+}
+
+function closeGame() {
+  frame.src = "";
+  modal.style.display = "none";
+}
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    frame.requestFullscreen();
+  } else {
+    document.exitFullscreen();
+  }
+}
+</script>
+
+</body>
+</html>
